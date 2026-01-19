@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College Exam Seat Planner</title>
+    <link rel="stylesheet" href="../static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>College Exam Seat Planner</h1>
+        <h3>Allocate classrooms efficiently for Exams</h3>
+      </header>
+
+      <div class="main-grid">
+        <!-- Add classroom form -->
+        <section class="card add-classroom-section">
+          <h2>Add Classroom Details</h2>
+          <form id="addClassroomForm">
+            <div class="form-group">
+              <label for="roomId">Room ID:</label>
+              <input
+                type="text"
+                id="roomId"
+                placeholder="e.g., A101"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Capacity:</label>
+              <input
+                type="number"
+                id="capacity"
+                placeholder="e.g., 50"
+                min="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="floorNo">Floor Number:</label>
+              <input
+                type="number"
+                id="floorNo"
+                placeholder="e.g., 1"
+                min="0"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Near Washroom:</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="washroom-yes"
+                    name="nearWashroom"
+                    value="true"
+                  />
+                  <label for="washroom-yes">Yes</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="washroom-no"
+                    name="nearWashroom"
+                    value="false"
+                  />
+                  <label for="washroom-no">No</label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Classroom</button>
+          </form>
+          <div id="addError" class="error-message"></div>
+          <div id="addSuccess" class="success-message"></div>
+        </section>
+
+        <!-- View added classrooms -->
+        <section class="card view-classrooms-section">
+          <h2>View All Classrooms</h2>
+          <div id="classroomsList" class="classrooms-list">
+            <p class="empty-state">No classrooms added yet</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Allocate exam screen -->
+      <section class="card allocate-section">
+        <h2>Allocate Exam Seats</h2>
+        <div class="allocate-grid">
+          <div class="allocate-form">
+            <div class="form-group">
+              <label for="totalStudents">Total Students:</label>
+              <input
+                type="number"
+                id="totalStudents"
+                placeholder="e.g., 150"
+                min="1"
+              />
+            </div>
+            <button class="btn btn-success" id="allocateBtn">
+              Allocate Seats
+            </button>
+            <div id="allocateError" class="error-message"></div>
+          </div>
+
+          <!-- Output display panel -->
+          <div id="allocationResult" class="allocation-result hidden">
+            <h3>Allocation Results</h3>
+            <div id="resultContent"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- JavaScript file for functionality -->
+    <script src="../static/script.js"></script>
+  </body>
+</html>
