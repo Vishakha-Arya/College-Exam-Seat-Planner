@@ -17,12 +17,23 @@ let classrooms = [];
 
 // Initialize when page loads
 window.addEventListener('DOMContentLoaded', () => {
-    loadClassroomsFromStorage();
-    displayClassrooms();
+    loadClassrooms();
 });
 
+// Load classrooms from backend API
+async function loadClassrooms() {
+    try {
+        const response = await fetch('/api/classrooms');
+        classrooms = await response.json();
+        displayClassrooms();
+    } catch (error) {
+        console.error('Error loading classrooms:', error);
+        classrooms = [];
+    }
+}
+
 // Handle adding new classroom
-addClassroomForm.addEventListener('submit', (e) => {
+addClassroomForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     clearMessages();
@@ -42,12 +53,6 @@ addClassroomForm.addEventListener('submit', (e) => {
         return;
     }
 
-    // Check if room already exists
-    if (classrooms.some(c => c.roomId === roomId)) {
-        showError(addErrorDiv, `Room ${roomId} already exists`);
-        return;
-    }
-
     // Create new classroom object
     const newClassroom = {
         roomId,
@@ -56,18 +61,31 @@ addClassroomForm.addEventListener('submit', (e) => {
         nearWashroom
     };
 
-    // Add to array
-    classrooms.push(newClassroom);
+    try {
+        const response = await fetch('/api/classrooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newClassroom)
+        });
 
-    // Save to browser storage
-    saveClassroomsToStorage();
+        const data = await response.json();
 
-    // Show success message
-    showSuccess(addSuccessDiv, `Classroom ${roomId} added successfully!`);
+        if (!response.ok) {
+            showError(addErrorDiv, data.error || 'Failed to add classroom');
+            return;
+        }
 
-    // Reset form and update display
-    addClassroomForm.reset();
-    displayClassrooms();
+        // Show success message
+        showSuccess(addSuccessDiv, `Classroom ${roomId} added successfully!`);
+
+        // Reset form and reload display
+        addClassroomForm.reset();
+        loadClassrooms();
+    } catch (error) {
+        showError(addErrorDiv, 'Error adding classroom: ' + error.message);
+    }
 });
 
 // Display all classrooms
@@ -102,21 +120,31 @@ function displayClassrooms() {
 }
 
 // Delete a classroom
-function removeClassroom(roomId) {
+async function removeClassroom(roomId) {
     if (!confirm(`Delete classroom ${roomId}?`)) {
         return;
     }
 
-    // Remove from array
-    classrooms = classrooms.filter(c => c.roomId !== roomId);
+    try {
+        const response = await fetch(`/api/classrooms/${roomId}`, {
+            method: 'DELETE'
+        });
 
-    // Update storage and display
-    saveClassroomsToStorage();
-    displayClassrooms();
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || 'Failed to delete classroom');
+            return;
+        }
+
+        loadClassrooms();
+    } catch (error) {
+        alert('Error deleting classroom: ' + error.message);
+    }
 }
 
 // Allocate seats to classrooms
-allocateBtn.addEventListener('click', () => {
+allocateBtn.addEventListener('click', async () => {
     clearMessages();
 
     const totalStudents = parseInt(totalStudentsInput.value);
@@ -133,14 +161,23 @@ allocateBtn.addEventListener('click', () => {
         return;
     }
 
-    // Run allocation algorithm
-    const result = allocateExam(totalStudents);
+    try {
+        const response = await fetch('/api/allocate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ totalStudents: totalStudents })
+        });
 
-    // Show results
-    displayAllocationResult(result);
+        const result = await response.json();
+        displayAllocationResult(result);
+    } catch (error) {
+        showError(allocateErrorDiv, 'Error allocating seats: ' + error.message);
+    }
 });
 
-// Main allocation algorithm
+// Main allocation algorithm (kept for reference, now handled by backend)
 function allocateExam(totalStudents) {
     // Sort rooms by floor (prefer lower floors) then by capacity
     const availableRooms = [...classrooms].sort((a, b) => {
@@ -247,22 +284,4 @@ function clearMessages() {
     addErrorDiv.classList.remove('show');
     addSuccessDiv.classList.remove('show');
     allocateErrorDiv.classList.remove('show');
-}
-
-// Save classrooms to browser storage
-function saveClassroomsToStorage() {
-    localStorage.setItem('examClassrooms', JSON.stringify(classrooms));
-}
-
-// Load classrooms from browser storage
-function loadClassroomsFromStorage() {
-    const stored = localStorage.getItem('examClassrooms');
-    if (stored) {
-        try {
-            classrooms = JSON.parse(stored);
-        } catch (e) {
-            console.log('Could not load saved classrooms');
-            classrooms = [];
-        }
-    }
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "roomId": "a101",
+    "capacity": 20,
+    "floorNo": 1,
+    "nearWashroom": true
+  },
+  {
+    "roomId": "A101",
+    "capacity": 23,
+    "floorNo": 3,
+    "nearWashroom": true
+  }
+]
